@@ -36,7 +36,7 @@ Créez un fichier .env à la racine et configurez les variables nécessaires. Ex
 
 ```bash
 PORT=3000
-FORGE_ENDPOINT=http://localhost:8210/api
+FORGE_ENDPOINT=http://localhost:8210/api(TODO)
 ```
 Compiler le projet (TypeScript) :
 
