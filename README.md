@@ -26,21 +26,30 @@ Cloner le depot :
 git clone https://github.com/julienEcole/ticketing_backend.git
 cd ticketing_backend
 ```
-Installer les dépendances :
-
+# Installer les dépendances :
 ```bash
 npm install
 ```
-Configurer les variables d'environnement :
-Créez un fichier .env à la racine et configurez les variables nécessaires. Exemple minimal :
 
+# Configurer les variables d'environnement :
+Créez un fichier .env à la racine et configurez les variables nécessaires. Exemple minimal (TODO) :
 ```bash
 PORT=3000
 FORGE_ENDPOINT=http://localhost:8210/api(TODO)
 ```
-Compiler le projet (TypeScript) :
 
-
+# Compiler le projet (TypeScript) :
 ```bash
 npm run build
+```
+
+## Lancement
+# En mode développement (avec ts-node) :
+```bash
+npm run dev
+```
+
+# En mode production (avec les fichiers compilés) :
+```bash
+npm run start
 ```
