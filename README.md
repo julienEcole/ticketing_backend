@@ -104,7 +104,7 @@ ticketing_backend/
  │   ├── forge.toml            # Config de Foundry
  │   └── ...
  ├── src/
- │   ├── index.ts              # Point d\'entrée du backend
+ │   ├── index.ts              # Point d'sentrée du backend
  │   ├── blockchain/
  │   │   ├── ethereum.service.ts  # Interaction avec Ethereum
  │   │   └── ...
@@ -142,9 +142,7 @@ Les pull requests sont les bienvenues. Merci de suivre les bonnes pratiques de c
 
 ## 📌 Licence
 
-MIT
+NONE
 
 ---
-
-🚀 **Votre backend est maintenant prêt à interagir avec la blockchain Ethereum via Foundry !**
 
