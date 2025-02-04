@@ -1,14 +1,16 @@
-import express, { Router } from "express";
-import {
-  buyTicketController,
-  resellTicketController,
-  validateTicketController,
-} from "../controllers/ticket.controller";
+import express from "express";
+import { buyTicket } from "../blockchain/ethereum.service";
 
-const router: Router = express.Router();
+const router = express.Router();
 
-router.post("/buy", buyTicketController);
-router.post("/resell", resellTicketController);
-router.post("/validate", validateTicketController);
+router.post("/buy", async (req, res) => {
+    try {
+        const { matchId, price, buyer } = req.body;
+        const txHash = await buyTicket(matchId, price, buyer);
+        res.json({ success: true, txHash });
+    } catch (error) {
+        res.status(500).json({ success: false, error });
+    }
+});
 
 export default router;

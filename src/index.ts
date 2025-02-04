@@ -1,6 +1,8 @@
 import express, { Application } from "express";
 import dotenv from "dotenv";
 import ticketRoutes from "./routes/ticket.routes";
+import matchRoutes from "./routes/matches.routes"
+
 
 dotenv.config();
 
@@ -12,6 +14,7 @@ app.use(express.json());
 
 // Montage des routes
 app.use("/api/tickets", ticketRoutes);
+app.use("/api/matchs", matchRoutes);
 
 // Lancement du serveur
 app.listen(PORT, () => {
