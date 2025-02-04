@@ -1,68 +1,85 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
-contract Ticketing is ERC721Enumerable, Ownable {
+contract Ticketing is ERC721, Ownable {
+    struct Match {
+        uint256 matchId;
+        string title;
+        uint256 startTime;
+        uint256 totalSeats;
+        uint256 soldSeats;
+        string[] tags;
+    }
+
     struct Ticket {
+        uint256 matchId;
         uint256 price;
-        uint256 resaleCount;
-        bool isUsed; // 🔥 Indique si le ticket a été validé (utilisé)
-        address[] previousOwners; // 🔥 Historique des propriétaires
+        bool isUsed;
+        address owner;
     }
 
+    uint256 public nextMatchId = 1;
+    uint256 public nextTicketId = 1;
+    
+    mapping(uint256 => Match) public matches;
     mapping(uint256 => Ticket) public tickets;
-    uint256 public maxResale = 2;
-    uint256 public maxPriceIncrease = 120;
 
-    constructor() ERC721("EventTicket", "TICKET") Ownable(msg.sender) {}
+    constructor() ERC721("EventTicket", "TICKET") Ownable() {}
 
-    /// 🔹 Fonction pour créer un ticket (Minting)
-    function mintTicket(address to, uint256 ticketId, uint256 price) external onlyOwner {
-        require(!_exists(ticketId), "Ticket already exists");
-        tickets);
-        _safeMint(to, ticketId);
+    /// 🔹 **Créer un match**
+    function createMatch(
+        string memory title,
+        uint256 startTime,
+        uint256 totalSeats,
+        string[] memory tags
+    ) external onlyOwner {
+        require(totalSeats > 0, "Le match doit avoir des places dispo");
+
+        matches[nextMatchId] = Match({
+            matchId: nextMatchId,
+            title: title,
+            startTime: startTime,
+            totalSeats: totalSeats,
+            soldSeats: 0,
+            tags: tags
+        });
+
+        nextMatchId++;
     }
 
-    /// 🔹 Fonction pour revendre un ticket
-    function resellTicket(uint256 ticketId, address newOwner, uint256 newPrice) external {
-        require(ownerOf(ticketId) == msg.sender, "Not the ticket owner");
-        require(!tickets[ticketId].isUsed, "Used tickets cannot be resold"); // 🔥 Empêcher la revente si utilisé
-        require(tickets[ticketId].resaleCount < maxResale, "Max resale reached");
-        require(newPrice <= (tickets[ticketId].price * maxPriceIncrease) / 100, "Price too high");
+    /// 🔹 **Acheter un ticket pour un match**
+    function buyTicket(uint256 matchId, uint256 price) external {
+        require(matches[matchId].matchId != 0, "Match non existant");
+        require(matches[matchId].soldSeats < matches[matchId].totalSeats, "Plus de places disponibles");
 
-        // 🔥 Ajouter l'ancien propriétaire à la liste
-        tickets[ticketId].previousOwners.push(msg.sender);
+        tickets[nextTicketId] = Ticket({
+            matchId: matchId,
+            price: price,
+            isUsed: false,
+            owner: msg.sender
+        });
 
-        // 🔥 Transférer le ticket au nouveau propriétaire
-        _transfer(msg.sender, newOwner, ticketId);
+        _safeMint(msg.sender, nextTicketId);
+        matches[matchId].soldSeats++;
 
-        // 🔥 Mettre à jour le prix et le compteur de revente
-        tickets[ticketId].price = newPrice;
-        tickets[ticketId].resaleCount += 1;
+        nextTicketId++;
     }
 
-    /// 🔹 Fonction pour valider un ticket (entrée à l'événement)
-    function validateTicket(uint256 ticketId) external onlyOwner {
-        require(ownerOf(ticketId) != address(0), "Ticket does not exist");
-        require(!tickets[ticketId].isUsed, "Ticket already used"); // 🔥 Empêcher une double validation
-
-        tickets[ticketId].isUsed = true; // 🔥 Marquer le ticket comme utilisé
+    /// 🔹 **Voir les places restantes pour un match**
+    function getRemainingSeats(uint256 matchId) public view returns (uint256) {
+        require(matches[matchId].matchId != 0, "Match non existant");
+        return matches[matchId].totalSeats - matches[matchId].soldSeats;
     }
 
-    /// 🔹 Vérifie si une adresse est un ancien propriétaire
-    function isPreviousOwner(uint256 ticketId, address user) public view returns (bool) {
-        for (uint i = 0; i < tickets[ticketId].previousOwners.length; i++) {
-            if (tickets[ticketId].previousOwners[i] == user) {
-                return true;
-            }
+    /// 🔹 **Lister tous les matchs disponibles**
+    function getAllMatches() public view returns (Match[] memory) {
+        Match[] memory allMatches = new Match[](nextMatchId - 1);
+        for (uint256 i = 1; i < nextMatchId; i++) {
+            allMatches[i - 1] = matches[i];
         }
-        return false;
-    }
-
-    /// 🔹 Vérifie si un ticket est valide pour son propriétaire actuel
-    function isValidOwner(uint256 ticketId, address user) public view returns (bool) {
-        return ownerOf(ticketId) == user && !tickets[ticketId].isUsed;
+        return allMatches;
     }
 }
