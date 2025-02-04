@@ -77,7 +77,9 @@ Cela démarre un nœud Ethereum sur `http://localhost:8545` avec des comptes de 
 
 7️⃣ **Déployer le smart contract**
 ```bash
-node blockchain/script/deploy.js
+forge create --rpc-url adresseBlockchain \
+            --private-key privateKeyDuPropriétaireSans0xDevant \
+            src/Ticketing.sol:Ticketing --broadcast
 ```
 Cela affichera l'adresse du contrat déployé (`Contract deployed at: 0x...`).
 
